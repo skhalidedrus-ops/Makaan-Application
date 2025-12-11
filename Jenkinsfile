@@ -1,51 +1,58 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKERHUB_REPO = "khalidsaiyed/static-site"
+        DOCKER_BUILDKIT = "0"
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/skhalidedrus-ops/Makaan-Application.git'
+                git url: 'https://github.com/skhalidedrus-ops/Makaan-Application.git', branch: 'main'
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
-                sh """
-                export DOCKER_BUILDKIT=0
-                docker build -t ${DOCKERHUB_REPO}:latest .
-                """
+                sh '''
+                    docker build -t ${DOCKERHUB_REPO}:latest .
+                '''
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Docker Hub Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker',
-                    usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh """
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        """
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        docker login -u "$DOCKER_USER" --password-stdin <<EOF
+$DOCKER_PASS
+EOF
+                    '''
                 }
             }
         }
 
         stage('Push Image') {
             steps {
-                sh "docker push ${DOCKERHUB_REPO}:latest"
+                sh '''
+                    docker push ${DOCKERHUB_REPO}:latest
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "CI Pipeline completed — Image pushed to Docker Hub!"
+            echo "🎉 CI Success — Image built & pushed to Docker Hub!"
+        }
+        failure {
+            echo "❌ Pipeline Failed!"
         }
     }
 }
-
-
-
