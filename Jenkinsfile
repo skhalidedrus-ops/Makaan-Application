@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo.git'
+                git branch: 'main', url: 'https://github.com/skhalidedrus-ops/Makaan-Application.git'
             }
         }
 
@@ -45,3 +45,4 @@ pipeline {
         }
     }
 }
+
