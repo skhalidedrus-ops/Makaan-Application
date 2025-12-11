@@ -27,7 +27,7 @@ pipeline {
                 sh """
                 docker run -d \
                     --name static-site \
-                    -p 80:80 \
+                    -p 3000:3000 \
                     ${DOCKERHUB_REPO}:latest
                 """
             }
