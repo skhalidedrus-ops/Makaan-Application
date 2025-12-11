@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_REPO = "khalidsaiyed/static-site"
+        CONTAINER_NAME = "static-site"
     }
 
     stages {
@@ -13,11 +14,11 @@ pipeline {
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Stop & Remove Old Container') {
             steps {
                 sh """
-                docker stop static-site || true
-                docker rm static-site || true
+                docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
                 """
             }
         }
@@ -26,7 +27,7 @@ pipeline {
             steps {
                 sh """
                 docker run -d \
-                    --name static-site \
+                    --name ${CONTAINER_NAME} \
                     -p 3000:3000 \
                     ${DOCKERHUB_REPO}:latest
                 """
