@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_REPO = "khalidsaiyed/static-site"
+    }
+
+    stages {
+
+        stage('Pull Latest Image') {
+            steps {
+                sh "docker pull ${DOCKERHUB_REPO}:latest"
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh """
+                docker stop static-site || true
+                docker rm static-site || true
+                """
+            }
+        }
+
+        stage('Run New Container') {
+            steps {
+                sh """
+                docker run -d \
+                    --name static-site \
+                    -p 80:80 \
+                    ${DOCKERHUB_REPO}:latest
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "CD Pipeline completed — New container deployed successfully!"
+        }
+    }
+}
